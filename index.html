@@ -4,88 +4,164 @@
   <meta charset="UTF-8">
   <title>아이템 뽑기 시뮬레이션</title>
   <style>
-    body { font-family: sans-serif; margin: 30px; display: flex; flex-direction: column; align-items: center; }
-    .tabs { display: flex; margin-bottom: 20px; }
-    .tab-btn {
-      padding: 10px 20px; cursor: pointer;
-      border: 1px solid #ccc; border-bottom: none;
-      background: #f0f0f0; margin-right: 5px;
+    body { margin: 0; padding: 0; font-family: sans-serif; }
+    .layout {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
     }
-    .tab-btn.active { background: white; font-weight: bold; }
-    .tab-content { display: none; width: 100%; max-width: 900px; border: 1px solid #ccc; padding: 20px; }
-    .tab-content.active { display: block; }
-
-    button { padding: 8px 16px; margin: 5px; }
-    .item { padding: 2px; }
+    .content {
+      flex: 1;
+      max-width: 1000px;
+      padding: 20px;
+    }
+    .ad-left, .ad-right {
+      width: 160px;
+      margin: 10px;
+    }
+    .banner {
+      width: 100%;
+      text-align: center;
+      margin: 10px 0;
+    }
+    table { border-collapse: collapse; margin-top: 10px; width: 100%; }
+    th, td { border: 1px solid #ccc; padding: 6px; font-size: 14px; text-align: center; }
     .등급-일반 { color: gray; }
     .등급-희귀 { color: green; }
     .등급-영웅 { color: blue; }
     .등급-환상 { color: purple; }
     .등급-전설 { color: orange; font-weight: bold; }
-    table { border-collapse: collapse; margin-top: 10px; width: 100%; }
-    th, td { border: 1px solid #ccc; padding: 6px; font-size: 14px; text-align: center; }
     h2 { margin-top: 25px; }
+
+    /* 탭 버튼 스타일 */
+    .tabs { margin-top: 15px; }
+    .tab-btn {
+      display: inline-block;
+      padding: 8px 14px;
+      margin-right: 5px;
+      border: 1px solid #aaa;
+      border-radius: 4px 4px 0 0;
+      background: #eee;
+      cursor: pointer;
+    }
+    .tab-btn.active {
+      background: #fff;
+      border-bottom: 1px solid #fff;
+      font-weight: bold;
+    }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    /* 📱 모바일 최적화 */
+    @media (max-width: 1024px) {
+      .ad-left, .ad-right { display: none; } /* 좌우 광고 숨김 */
+      .layout { flex-direction: column; align-items: center; }
+      .content { max-width: 100%; }
+      .banner ins { width: 100% !important; height: auto !important; } /* 배너는 화면에 맞춤 */
+    }
   </style>
 </head>
 <body>
-  <h1>아이템 뽑기 시뮬레이션</h1>
-
-  <!-- 탭 버튼 -->
-  <div class="tabs">
-    <div class="tab-btn active" onclick="openTab('mir')">미르의 비늘 뽑기</div>
-    <div class="tab-btn" onclick="openTab('ring')">세련된 반지 랜덤 박스</div>
+  <!-- 상단 배너 광고 -->
+  <div class="banner">
+    <ins class="adsbygoogle"
+         style="display:block;width:728px;height:90px;margin:auto"
+         data-ad-client="ca-pub-5693314639637279"
+         data-ad-slot="1111111111"></ins>
   </div>
 
-  <!-- 미르의 비늘 탭 -->
-  <div id="mir" class="tab-content active">
-    <h2>미르의 비늘 뽑기</h2>
-    <div class="controls">
-      <button onclick="draw('mir',1,0)">1회</button>
-      <button onclick="draw('mir',11,30000)">10+1 (30,000원)</button>
-      <button onclick="draw('mir',24,60000)">20+4 (60,000원)</button>
-      <button onclick="draw('mir',39,90000)">30+9 (90,000원)</button>
-    </div>
-    <h3>통계 요약</h3>
-    <div id="summaryStats_mir">아직 없음</div>
-    <h3>결과 요약</h3>
-    <div id="summary_mir">없음</div>
-    <h3>전체 결과</h3>
-    <div id="stats_mir"></div>
-    <h3>히스토리 (최신 100개)</h3>
-    <div id="history_mir"></div>
+  <div class="layout">
+    <!-- 좌측 광고 -->
+    <aside class="ad-left">
+      <ins class="adsbygoogle"
+           style="display:block;width:160px;height:600px"
+           data-ad-client="ca-pub-5693314639637279"
+           data-ad-slot="2222222222"></ins>
+    </aside>
+
+    <!-- 중앙 콘텐츠 -->
+    <main class="content">
+      <h1>아이템 뽑기 시뮬레이션</h1>
+
+      <!-- 탭 버튼 -->
+      <div class="tabs">
+        <div class="tab-btn active" onclick="openTab('mir')">미르의 비늘 뽑기</div>
+        <div class="tab-btn" onclick="openTab('ring')">세련된 반지 랜덤 박스</div>
+      </div>
+
+      <!-- 미르의 비늘 탭 -->
+      <div id="mir" class="tab-content active">
+        <h2>미르의 비늘 뽑기</h2>
+        <div class="controls">
+          <button onclick="draw('mir',1,0)">1회</button>
+          <button onclick="draw('mir',11,30000)">10+1 (30,000원)</button>
+          <button onclick="draw('mir',24,60000)">20+4 (60,000원)</button>
+          <button onclick="draw('mir',39,90000)">30+9 (90,000원)</button>
+        </div>
+        <h3>통계 요약</h3>
+        <div id="summaryStats_mir">아직 없음</div>
+        <h3>결과 요약</h3>
+        <div id="summary_mir">없음</div>
+        <h3>전체 결과</h3>
+        <table id="stats_mir"><tr><th>등급</th><th>아이템</th><th>개수</th><th>실제 획득률</th></tr></table>
+      </div>
+
+      <!-- 세련된 반지 탭 -->
+      <div id="ring" class="tab-content">
+        <h2>세련된 반지 랜덤 박스</h2>
+        <div class="controls">
+          <button onclick="draw('ring',11,30000)">10+1 (30,000원)</button>
+        </div>
+        <h3>통계 요약</h3>
+        <div id="summaryStats_ring">아직 없음</div>
+        <h3>결과 요약</h3>
+        <div id="summary_ring">없음</div>
+        <h3>전체 결과</h3>
+        <table id="stats_ring"><tr><th>등급</th><th>아이템</th><th>개수</th><th>실제 획득률</th></tr></table>
+        <h3>히스토리 (최신 100개)</h3>
+        <div id="history_ring"></div>
+      </div>
+    </main>
+
+    <!-- 우측 광고 -->
+    <aside class="ad-right">
+      <ins class="adsbygoogle"
+           style="display:block;width:160px;height:600px"
+           data-ad-client="ca-pub-5693314639637279"
+           data-ad-slot="3333333333"></ins>
+    </aside>
   </div>
 
-  <!-- 세련된 반지 탭 -->
-  <div id="ring" class="tab-content">
-    <h2>세련된 반지 랜덤 박스</h2>
-    <div class="controls">
-      <button onclick="draw('ring',11,30000)">10+1 (30,000원)</button>
-    </div>
-    <h3>통계 요약</h3>
-    <div id="summaryStats_ring">아직 없음</div>
-    <h3>결과 요약</h3>
-    <div id="summary_ring">없음</div>
-    <h3>전체 결과</h3>
-    <div id="stats_ring"></div>
-    <h3>히스토리 (최신 100개)</h3>
-    <div id="history_ring"></div>
+  <!-- 하단 배너 광고 -->
+  <div class="banner">
+    <ins class="adsbygoogle"
+         style="display:block;width:728px;height:90px;margin:auto"
+         data-ad-client="ca-pub-5693314639637279"
+         data-ad-slot="4444444444"></ins>
   </div>
 
+  <!-- 구글 광고 스크립트 -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5693314639637279" crossorigin="anonymous"></script>
+  <script>
+    (adsbygoogle = window.adsbygoogle || []).push({});
+  </script>
+
+  <!-- 뽑기 로직 -->
   <script>
     const MAX_HISTORY = 100;
     const gradeOrder = ["전설","환상","영웅","희귀","일반"];
 
-    // --- 미르의 비늘 아이템 풀 (이전과 동일) ---
+    // === 아이템 풀 (오타 수정 반영) ===
     const items_mir = [
-      { name: "하미르의 풋씨", grade: "일반", rate: 7.00 },
-      { name: "보미르의 실바람", grade: "일반", rate: 8.40 },
+      { name: "하미르의 불씨", grade: "일반", rate: 7.00 },
+      { name: "보미르의 산들바람", grade: "일반", rate: 8.40 }, // 수정
       { name: "수미르의 새싹", grade: "일반", rate: 8.40 },
-      { name: "무미르의 왕관", grade: "일반", rate: 7.00 },
+      { name: "무미르의 물방울", grade: "일반", rate: 7.00 },
       { name: "치미르의 별", grade: "일반", rate: 8.40 },
       { name: "커미르의 그림자", grade: "일반", rate: 7.00 },
       { name: "아미르의 빛조각", grade: "일반", rate: 8.40 },
       { name: "하미르의 불꽃", grade: "희귀", rate: 3.00 },
-      { name: "보미르의 신록", grade: "희귀", rate: 3.60 },
+      { name: "보미르의 실바람", grade: "희귀", rate: 3.60 }, // 수정
       { name: "수미르의 뿌리", grade: "희귀", rate: 3.60 },
       { name: "무미르의 여울", grade: "희귀", rate: 3.00 },
       { name: "치미르의 유성", grade: "희귀", rate: 4.20 },
@@ -95,7 +171,7 @@
       { name: "보미르의 돌개바람", grade: "영웅", rate: 1.80 },
       { name: "수미르의 나무", grade: "영웅", rate: 1.00 },
       { name: "무미르의 폭포", grade: "영웅", rate: 1.00 },
-      { name: "치미르의 궤성", grade: "영웅", rate: 1.80 },
+      { name: "치미르의 거성", grade: "영웅", rate: 1.80 },
       { name: "커미르의 어둠", grade: "영웅", rate: 1.80 },
       { name: "아미르의 광채", grade: "영웅", rate: 1.80 },
       { name: "하미르의 화염", grade: "환상", rate: 0.50 },
@@ -103,18 +179,16 @@
       { name: "수미르의 숲", grade: "환상", rate: 0.60 },
       { name: "무미르의 소용돌이", grade: "환상", rate: 0.60 },
       { name: "치미르의 성좌", grade: "환상", rate: 0.60 },
-      { name: "커미르의 월출", grade: "환상", rate: 0.60 },
+      { name: "커미르의 칠흑", grade: "환상", rate: 0.60 },
       { name: "아미르의 노을", grade: "환상", rate: 0.60 },
-      { name: "하미르의 영혼", grade: "전설", rate: 0.17 },
+      { name: "하미르의 열화", grade: "전설", rate: 0.17 },
       { name: "보미르의 폭풍", grade: "전설", rate: 0.33 },
-      { name: "수미르의 대지", grade: "전설", rate: 0.33 },
+      { name: "수미르의 산맥", grade: "전설", rate: 0.33 },
       { name: "무미르의 해류", grade: "전설", rate: 0.17 },
       { name: "치미르의 성운", grade: "전설", rate: 0.33 },
-      { name: "커미르의 석양", grade: "전설", rate: 0.33 },
-      { name: "아미르의 여행", grade: "전설", rate: 0.34 },
+      { name: "커미르의 심연", grade: "전설", rate: 0.33 },
+      { name: "아미르의 여명", grade: "전설", rate: 0.34 },
     ];
-
-    // --- 세련된 반지 랜덤 박스 아이템 풀 (업로드 이미지 반영) ---
     const items_ring = [
       { name: "트리플 접두사 부적 상자(반지용)", grade: "전설", rate: 1.00 },
       { name: "달인의 편린", grade: "전설", rate: 0.20 },
@@ -133,12 +207,38 @@
       { name: "이채로운 혼돈의 자루", grade: "일반", rate: 46.00 },
     ];
 
-    // 상태 저장소
+    // === 상태 관리 ===
     const state = {
       mir: { totalDraws:0, totalSpent:0, itemCount:{}, gradeCount:{"일반":0,"희귀":0,"영웅":0,"환상":0,"전설":0} },
       ring: { totalDraws:0, totalSpent:0, itemCount:{}, gradeCount:{"일반":0,"희귀":0,"영웅":0,"환상":0,"전설":0} }
     };
+    const tableCells = { mir:{}, ring:{} };
 
+    // === 초기 테이블 생성 ===
+    function initTables(){
+      ["mir","ring"].forEach(tab=>{
+        const pool=(tab==="mir"?items_mir:items_ring);
+        const table=document.getElementById("stats_"+tab);
+        gradeOrder.forEach(g=>{
+          let group=pool.filter(i=>i.grade===g);
+          if(group.length>0){
+            let header=document.createElement("tr");
+            header.innerHTML=`<td colspan="4" class="등급-${g}" style="text-align:left;font-weight:bold;background:#f0f0f0;">[${g}]</td>`;
+            table.appendChild(header);
+            group.forEach(item=>{
+              let row=document.createElement("tr");
+              row.className="등급-"+g;
+              row.innerHTML=`<td>${g}</td><td>${item.name}</td><td id="${tab}_${item.name}_count">0</td><td id="${tab}_${item.name}_rate">0%</td>`;
+              table.appendChild(row);
+              tableCells[tab][item.name]={ count:document.getElementById(`${tab}_${item.name}_count`), rate:document.getElementById(`${tab}_${item.name}_rate`) };
+            });
+          }
+        });
+      });
+    }
+    initTables();
+
+    // === 탭 열기 ===
     function openTab(tab) {
       document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
       document.querySelectorAll(".tab-content").forEach(c=>c.classList.remove("active"));
@@ -146,14 +246,18 @@
       document.getElementById(tab).classList.add("active");
     }
 
+    // === 뽑기 실행 ===
     function draw(tab,count,cost){
       let pool = (tab==="mir"?items_mir:items_ring);
       let results=[];
       for(let i=0;i<count;i++) results.push(drawOneItem(pool));
-      setTimeout(()=>{
-        updateStats(tab,results,count,cost);
+      if(tab==="ring") updateHistory(tab,results);
+      updateStats(tab,results,count,cost);
+
+      // DOM 업데이트는 다음 프레임으로 지연 → 렉 완화
+      requestAnimationFrame(()=>{
         showResult(tab,results);
-      },0);
+      });
     }
 
     function drawOneItem(pool){
@@ -161,16 +265,31 @@
       for(let item of pool){ cumulative+=item.rate; if(rand<=cumulative) return item; }
     }
 
+    // === 통계 갱신 ===
     function updateStats(tab,results,count,cost){
       let st=state[tab];
       st.totalDraws+=count; st.totalSpent+=cost;
       results.forEach(i=>{
         if(!st.itemCount[i.name]) st.itemCount[i.name]={grade:i.grade,count:0};
-        st.itemCount[i.name].count++; st.gradeCount[i.grade]++; 
+        st.itemCount[i.name].count++; st.gradeCount[i.grade]++;
+        let cell=tableCells[tab][i.name];
+        if(cell){
+          cell.count.textContent=st.itemCount[i.name].count;
+          cell.rate.textContent=((st.itemCount[i.name].count/st.totalDraws)*100).toFixed(2)+"%";
+        }
       });
-      updateHistory(tab,results); showStats(tab);
+      document.getElementById("summaryStats_"+tab).innerHTML=`
+        총 뽑기 횟수: ${st.totalDraws}회<br>
+        총 사용 금액: ${st.totalSpent.toLocaleString()}원<br>
+        ────────────────<br>
+        <span class="등급-일반">일반: ${st.gradeCount["일반"]}개</span><br>
+        <span class="등급-희귀">희귀: ${st.gradeCount["희귀"]}개</span><br>
+        <span class="등급-영웅">영웅: ${st.gradeCount["영웅"]}개</span><br>
+        <span class="등급-환상">환상: ${st.gradeCount["환상"]}개</span><br>
+        <span class="등급-전설">전설: ${st.gradeCount["전설"]}개</span>`;
     }
 
+    // === 결과 요약 ===
     function showResult(tab,results){
       let summaryMap={};
       results.forEach(i=>{
@@ -181,47 +300,16 @@
       document.getElementById("summary_"+tab).innerHTML=html;
     }
 
+    // === 히스토리 갱신 ===
     function updateHistory(tab,results){
       const history=document.getElementById("history_"+tab);
-      const fragment=document.createDocumentFragment();
       results.forEach(i=>{
         let div=document.createElement("div");
         div.className="item 등급-"+i.grade;
-        div.innerText=`[${i.grade}] ${i.name}`;
-        fragment.prepend(div);
+        div.textContent=`[${i.grade}] ${i.name}`;
+        history.prepend(div);
       });
-      history.prepend(fragment);
       while(history.childNodes.length>MAX_HISTORY){ history.removeChild(history.lastChild); }
-    }
-
-    function showStats(tab){
-      let st=state[tab]; let table="<table><tr><th>등급</th><th>아이템</th><th>개수</th><th>실제 획득률</th></tr>";
-      gradeOrder.forEach(g=>{
-        let filtered=Object.entries(st.itemCount).filter(([_,o])=>o.grade===g);
-        if(filtered.length>0){
-          table+=`<tr class="등급-${g}" style="background:#f0f0f0;"><td colspan="4" style="text-align:left; font-weight:bold;">[${g}]</td></tr>`;
-          filtered.sort((a,b)=>a[0].localeCompare(b[0]));
-          filtered.forEach(([n,o])=>{
-            let rate=((o.count/st.totalDraws)*100).toFixed(2);
-            table+=`<tr class="등급-${o.grade}"><td>${o.grade}</td><td>${n}</td><td>${o.count}</td><td>${rate}%</td></tr>`;
-          });
-          let totalCount=filtered.reduce((s,[_,o])=>s+o.count,0);
-          let totalRate=((totalCount/st.totalDraws)*100).toFixed(2);
-          table+=`<tr class="등급-${g}" style="font-weight:bold;"><td colspan="2">[${g} 합계]</td><td>${totalCount}</td><td>${totalRate}%</td></tr>`;
-        }
-      });
-      table+="</table>";
-      document.getElementById("stats_"+tab).innerHTML=table;
-
-      document.getElementById("summaryStats_"+tab).innerHTML=`
-        총 뽑기 횟수: ${st.totalDraws}회<br>
-        총 사용 금액: ${st.totalSpent.toLocaleString()}원<br>
-        ────────────────<br>
-        <span class="등급-일반">일반: ${st.gradeCount["일반"]}개</span><br>
-        <span class="등급-희귀">희귀: ${st.gradeCount["희귀"]}개</span><br>
-        <span class="등급-영웅">영웅: ${st.gradeCount["영웅"]}개</span><br>
-        <span class="등급-환상">환상: ${st.gradeCount["환상"]}개</span><br>
-        <span class="등급-전설">전설: ${st.gradeCount["전설"]}개</span>`;
     }
   </script>
 </body>
