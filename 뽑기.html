@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>아이템 뽑기 시뮬레이션</title>
+  <style>
+    body { font-family: sans-serif; margin: 30px; display: flex; flex-direction: column; align-items: center; }
+    .tabs { display: flex; margin-bottom: 20px; }
+    .tab-btn {
+      padding: 10px 20px; cursor: pointer;
+      border: 1px solid #ccc; border-bottom: none;
+      background: #f0f0f0; margin-right: 5px;
+    }
+    .tab-btn.active { background: white; font-weight: bold; }
+    .tab-content { display: none; width: 100%; max-width: 900px; border: 1px solid #ccc; padding: 20px; }
+    .tab-content.active { display: block; }
+
+    button { padding: 8px 16px; margin: 5px; }
+    .item { padding: 2px; }
+    .등급-일반 { color: gray; }
+    .등급-희귀 { color: green; }
+    .등급-영웅 { color: blue; }
+    .등급-환상 { color: purple; }
+    .등급-전설 { color: orange; font-weight: bold; }
+    table { border-collapse: collapse; margin-top: 10px; width: 100%; }
+    th, td { border: 1px solid #ccc; padding: 6px; font-size: 14px; text-align: center; }
+    h2 { margin-top: 25px; }
+  </style>
+</head>
+<body>
+  <h1>아이템 뽑기 시뮬레이션</h1>
+
+  <!-- 탭 버튼 -->
+  <div class="tabs">
+    <div class="tab-btn active" onclick="openTab('mir')">미르의 비늘 뽑기</div>
+    <div class="tab-btn" onclick="openTab('ring')">세련된 반지 랜덤 박스</div>
+  </div>
+
+  <!-- 미르의 비늘 탭 -->
+  <div id="mir" class="tab-content active">
+    <h2>미르의 비늘 뽑기</h2>
+    <div class="controls">
+      <button onclick="draw('mir',1,0)">1회</button>
+      <button onclick="draw('mir',11,30000)">10+1 (30,000원)</button>
+      <button onclick="draw('mir',24,60000)">20+4 (60,000원)</button>
+      <button onclick="draw('mir',39,90000)">30+9 (90,000원)</button>
+    </div>
+    <h3>통계 요약</h3>
+    <div id="summaryStats_mir">아직 없음</div>
+    <h3>결과 요약</h3>
+    <div id="summary_mir">없음</div>
+    <h3>전체 결과</h3>
+    <div id="stats_mir"></div>
+    <h3>히스토리 (최신 100개)</h3>
+    <div id="history_mir"></div>
+  </div>
+
+  <!-- 세련된 반지 탭 -->
+  <div id="ring" class="tab-content">
+    <h2>세련된 반지 랜덤 박스</h2>
+    <div class="controls">
+      <button onclick="draw('ring',11,30000)">10+1 (30,000원)</button>
+    </div>
+    <h3>통계 요약</h3>
+    <div id="summaryStats_ring">아직 없음</div>
+    <h3>결과 요약</h3>
+    <div id="summary_ring">없음</div>
+    <h3>전체 결과</h3>
+    <div id="stats_ring"></div>
+    <h3>히스토리 (최신 100개)</h3>
+    <div id="history_ring"></div>
+  </div>
+
+  <script>
+    const MAX_HISTORY = 100;
+    const gradeOrder = ["전설","환상","영웅","희귀","일반"];
+
+    // --- 미르의 비늘 아이템 풀 (이전과 동일) ---
+    const items_mir = [
+      { name: "하미르의 풋씨", grade: "일반", rate: 7.00 },
+      { name: "보미르의 실바람", grade: "일반", rate: 8.40 },
+      { name: "수미르의 새싹", grade: "일반", rate: 8.40 },
+      { name: "무미르의 왕관", grade: "일반", rate: 7.00 },
+      { name: "치미르의 별", grade: "일반", rate: 8.40 },
+      { name: "커미르의 그림자", grade: "일반", rate: 7.00 },
+      { name: "아미르의 빛조각", grade: "일반", rate: 8.40 },
+      { name: "하미르의 불꽃", grade: "희귀", rate: 3.00 },
+      { name: "보미르의 신록", grade: "희귀", rate: 3.60 },
+      { name: "수미르의 뿌리", grade: "희귀", rate: 3.60 },
+      { name: "무미르의 여울", grade: "희귀", rate: 3.00 },
+      { name: "치미르의 유성", grade: "희귀", rate: 4.20 },
+      { name: "커미르의 어스름", grade: "희귀", rate: 4.20 },
+      { name: "아미르의 성광", grade: "희귀", rate: 4.20 },
+      { name: "하미르의 불길", grade: "영웅", rate: 1.00 },
+      { name: "보미르의 돌개바람", grade: "영웅", rate: 1.80 },
+      { name: "수미르의 나무", grade: "영웅", rate: 1.00 },
+      { name: "무미르의 폭포", grade: "영웅", rate: 1.00 },
+      { name: "치미르의 궤성", grade: "영웅", rate: 1.80 },
+      { name: "커미르의 어둠", grade: "영웅", rate: 1.80 },
+      { name: "아미르의 광채", grade: "영웅", rate: 1.80 },
+      { name: "하미르의 화염", grade: "환상", rate: 0.50 },
+      { name: "보미르의 질풍", grade: "환상", rate: 0.50 },
+      { name: "수미르의 숲", grade: "환상", rate: 0.60 },
+      { name: "무미르의 소용돌이", grade: "환상", rate: 0.60 },
+      { name: "치미르의 성좌", grade: "환상", rate: 0.60 },
+      { name: "커미르의 월출", grade: "환상", rate: 0.60 },
+      { name: "아미르의 노을", grade: "환상", rate: 0.60 },
+      { name: "하미르의 영혼", grade: "전설", rate: 0.17 },
+      { name: "보미르의 폭풍", grade: "전설", rate: 0.33 },
+      { name: "수미르의 대지", grade: "전설", rate: 0.33 },
+      { name: "무미르의 해류", grade: "전설", rate: 0.17 },
+      { name: "치미르의 성운", grade: "전설", rate: 0.33 },
+      { name: "커미르의 석양", grade: "전설", rate: 0.33 },
+      { name: "아미르의 여행", grade: "전설", rate: 0.34 },
+    ];
+
+    // --- 세련된 반지 랜덤 박스 아이템 풀 (업로드 이미지 반영) ---
+    const items_ring = [
+      { name: "트리플 접두사 부적 상자(반지용)", grade: "전설", rate: 1.00 },
+      { name: "달인의 편린", grade: "전설", rate: 0.20 },
+      { name: "순례의 반지", grade: "전설", rate: 0.20 },
+      { name: "염진의 반지", grade: "전설", rate: 0.20 },
+      { name: "동진의 반지", grade: "전설", rate: 0.20 },
+      { name: "풍진의 반지", grade: "전설", rate: 0.20 },
+      { name: "지진의 반지", grade: "전설", rate: 0.20 },
+      { name: "광진의 반지", grade: "전설", rate: 0.20 },
+      { name: "명진의 반지", grade: "전설", rate: 0.20 },
+      { name: "수수께끼의 반지 보관함", grade: "환상", rate: 5.00 },
+      { name: "증폭된 혼돈의 마법석", grade: "영웅", rate: 10.00 },
+      { name: "혼돈의 마법석 (x5)", grade: "영웅", rate: 4.00 },
+      { name: "증폭된 혼돈의 마법서", grade: "희귀", rate: 15.40 },
+      { name: "혼돈의 마법서 (x2)", grade: "희귀", rate: 17.00 },
+      { name: "이채로운 혼돈의 자루", grade: "일반", rate: 46.00 },
+    ];
+
+    // 상태 저장소
+    const state = {
+      mir: { totalDraws:0, totalSpent:0, itemCount:{}, gradeCount:{"일반":0,"희귀":0,"영웅":0,"환상":0,"전설":0} },
+      ring: { totalDraws:0, totalSpent:0, itemCount:{}, gradeCount:{"일반":0,"희귀":0,"영웅":0,"환상":0,"전설":0} }
+    };
+
+    function openTab(tab) {
+      document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
+      document.querySelectorAll(".tab-content").forEach(c=>c.classList.remove("active"));
+      document.querySelector(`.tab-btn[onclick="openTab('${tab}')"]`).classList.add("active");
+      document.getElementById(tab).classList.add("active");
+    }
+
+    function draw(tab,count,cost){
+      let pool = (tab==="mir"?items_mir:items_ring);
+      let results=[];
+      for(let i=0;i<count;i++) results.push(drawOneItem(pool));
+      setTimeout(()=>{
+        updateStats(tab,results,count,cost);
+        showResult(tab,results);
+      },0);
+    }
+
+    function drawOneItem(pool){
+      const rand=Math.random()*100; let cumulative=0;
+      for(let item of pool){ cumulative+=item.rate; if(rand<=cumulative) return item; }
+    }
+
+    function updateStats(tab,results,count,cost){
+      let st=state[tab];
+      st.totalDraws+=count; st.totalSpent+=cost;
+      results.forEach(i=>{
+        if(!st.itemCount[i.name]) st.itemCount[i.name]={grade:i.grade,count:0};
+        st.itemCount[i.name].count++; st.gradeCount[i.grade]++; 
+      });
+      updateHistory(tab,results); showStats(tab);
+    }
+
+    function showResult(tab,results){
+      let summaryMap={};
+      results.forEach(i=>{
+        if(!summaryMap[i.name]) summaryMap[i.name]={grade:i.grade,count:0};
+        summaryMap[i.name].count++;
+      });
+      let html=Object.entries(summaryMap).map(([n,o])=>`<span class="등급-${o.grade}">[${o.grade}] ${n} x${o.count}</span>`).join("<br>");
+      document.getElementById("summary_"+tab).innerHTML=html;
+    }
+
+    function updateHistory(tab,results){
+      const history=document.getElementById("history_"+tab);
+      const fragment=document.createDocumentFragment();
+      results.forEach(i=>{
+        let div=document.createElement("div");
+        div.className="item 등급-"+i.grade;
+        div.innerText=`[${i.grade}] ${i.name}`;
+        fragment.prepend(div);
+      });
+      history.prepend(fragment);
+      while(history.childNodes.length>MAX_HISTORY){ history.removeChild(history.lastChild); }
+    }
+
+    function showStats(tab){
+      let st=state[tab]; let table="<table><tr><th>등급</th><th>아이템</th><th>개수</th><th>실제 획득률</th></tr>";
+      gradeOrder.forEach(g=>{
+        let filtered=Object.entries(st.itemCount).filter(([_,o])=>o.grade===g);
+        if(filtered.length>0){
+          table+=`<tr class="등급-${g}" style="background:#f0f0f0;"><td colspan="4" style="text-align:left; font-weight:bold;">[${g}]</td></tr>`;
+          filtered.sort((a,b)=>a[0].localeCompare(b[0]));
+          filtered.forEach(([n,o])=>{
+            let rate=((o.count/st.totalDraws)*100).toFixed(2);
+            table+=`<tr class="등급-${o.grade}"><td>${o.grade}</td><td>${n}</td><td>${o.count}</td><td>${rate}%</td></tr>`;
+          });
+          let totalCount=filtered.reduce((s,[_,o])=>s+o.count,0);
+          let totalRate=((totalCount/st.totalDraws)*100).toFixed(2);
+          table+=`<tr class="등급-${g}" style="font-weight:bold;"><td colspan="2">[${g} 합계]</td><td>${totalCount}</td><td>${totalRate}%</td></tr>`;
+        }
+      });
+      table+="</table>";
+      document.getElementById("stats_"+tab).innerHTML=table;
+
+      document.getElementById("summaryStats_"+tab).innerHTML=`
+        총 뽑기 횟수: ${st.totalDraws}회<br>
+        총 사용 금액: ${st.totalSpent.toLocaleString()}원<br>
+        ────────────────<br>
+        <span class="등급-일반">일반: ${st.gradeCount["일반"]}개</span><br>
+        <span class="등급-희귀">희귀: ${st.gradeCount["희귀"]}개</span><br>
+        <span class="등급-영웅">영웅: ${st.gradeCount["영웅"]}개</span><br>
+        <span class="등급-환상">환상: ${st.gradeCount["환상"]}개</span><br>
+        <span class="등급-전설">전설: ${st.gradeCount["전설"]}개</span>`;
+    }
+  </script>
+</body>
+</html>
